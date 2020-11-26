@@ -3,7 +3,7 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-std::string const CChallenge_N::sm_inputFilePath = "../../Inputs/Input_Challenge_N.txt";
+std::string const CChallenge_N::sm_inputFilePath = "Inputs/Input_Challenge_N.txt";
 
 
 
