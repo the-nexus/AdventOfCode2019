@@ -1,4 +1,5 @@
 #include "Challenge_01.h"
+#include "../Helpers/FileHelpers.h"
 
 
 
@@ -15,20 +16,19 @@ EErrorCode CChallenge_01::SetUp_FirstPart()
 
 EErrorCode CChallenge_01::Run_FirstPart()
 {
-    std::ifstream inputFile(sm_inputFilePath.c_str());
-    if (!inputFile.is_open())
+    std::vector<std::string> lines;
+    EErrorCode const readErrorCode = FileHelper::ReadLines(sm_inputFilePath, lines);
+    if (readErrorCode != EErrorCode::Success)
     {
-        return EErrorCode::FileNotFound;
+        return readErrorCode;
     }
 
     int totalRequiredFuel = 0;
-
-    std::string line;
-    while (std::getline(inputFile, line))
+    for (std::string const& line : lines)
     {
-        totalRequiredFuel += GetRequiredFuel(atoi(line.c_str()));
+        int const moduleMass = atoi(line.c_str());
+        totalRequiredFuel += GetRequiredFuel(moduleMass);
     }
-    inputFile.close();
 
     std::cout << "Total required fuel = " << totalRequiredFuel << std::endl;
     return EErrorCode::Success;
@@ -49,20 +49,19 @@ EErrorCode CChallenge_01::SetUp_SecondPart()
 
 EErrorCode CChallenge_01::Run_SecondPart()
 {
-    std::ifstream inputFile(sm_inputFilePath.c_str());
-    if (!inputFile.is_open())
+    std::vector<std::string> lines;
+    EErrorCode const readErrorCode = FileHelper::ReadLines(sm_inputFilePath, lines);
+    if (readErrorCode != EErrorCode::Success)
     {
-        return EErrorCode::Success;
+        return readErrorCode;
     }
 
     int totalRequiredFuel = 0;
-
-    std::string line;
-    while (std::getline(inputFile, line))
+    for (std::string const& line : lines)
     {
-        totalRequiredFuel += GetRecursiveRequiredFuel(atoi(line.c_str()));
+        int const moduleMass = atoi(line.c_str());
+        totalRequiredFuel += GetRecursiveRequiredFuel(moduleMass);
     }
-    inputFile.close();
 
     std::cout << "Total required fuel = " << totalRequiredFuel << std::endl;
     return EErrorCode::Success;
