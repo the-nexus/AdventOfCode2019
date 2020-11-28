@@ -14,7 +14,8 @@ private:
     virtual EErrorCode CleanUp_SecondPart() override;
 
     EErrorCode LoadIntcodeProgramMemory();
-    static EErrorCode RunIntcodeProgram(int* programMemory);
+    static EErrorCode RunIntcodeProgram(int* programMemory, int const inputValue);
+    static int GetParamMode(int const paramModes, int const idx);
 
     static std::string const sm_inputFilePath;
     int* m_initialProgramMemory = nullptr;

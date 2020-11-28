@@ -2,7 +2,7 @@
 
 // EDIT HERE! These lines will change what is executed
 #define CHALLENGE_TYPE CChallenge_05
-#define IS_FIRST_PART true
+#define IS_FIRST_PART false
 
 
 
