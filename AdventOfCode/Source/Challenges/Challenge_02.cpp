@@ -1,5 +1,6 @@
 #include "Challenge_02.h"
 #include "../Helpers/FileHelpers.h"
+#include "../Utilities/IntcodeProgram.h"
 
 
 
@@ -11,27 +12,30 @@ std::string const CChallenge_02::sm_inputFilePath = "Inputs/Input_Challenge_02.t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 EErrorCode CChallenge_02::SetUp_FirstPart()
 {
-    return LoadIntcodeProgramMemory();
+    return LoadInitialMemory();
 }
 
 EErrorCode CChallenge_02::Run_FirstPart()
 {
-    m_initialProgramMemory[1] = 12;
-    m_initialProgramMemory[2] = 2;
+    CIntcodeProgram program;
+    program.SetMemory(m_initialMemory, m_memorySize);
+    program.SetMemoryAt(1, 12);
+    program.SetMemoryAt(2, 2);
 
-    EErrorCode const programErrorCode = RunIntcodeProgram(m_initialProgramMemory);
+
+    EErrorCode const programErrorCode = program.Run();
     if (programErrorCode != EErrorCode::Success)
     {
         return programErrorCode;
     }
 
-    std::cout << "First integer = " << m_initialProgramMemory[0] << std::endl;
+    std::cout << "First integer = " << program.GetMemoryAt(0) << std::endl;
     return EErrorCode::Success;
 }
 
 EErrorCode CChallenge_02::CleanUp_FirstPart()
 {
-    delete[] m_initialProgramMemory;
+    delete[] m_initialMemory;
     return EErrorCode::Success;
 }
 
@@ -40,34 +44,34 @@ EErrorCode CChallenge_02::CleanUp_FirstPart()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 EErrorCode CChallenge_02::SetUp_SecondPart()
 {
-    return LoadIntcodeProgramMemory();
+    return LoadInitialMemory();
 }
 
 EErrorCode CChallenge_02::Run_SecondPart()
 {
-    EErrorCode programErrorCode = EErrorCode::Undefined;
-    int* programMemory = new int[m_programSize];
+    EErrorCode programErrorCode;
+    CIntcodeProgram program;
 
     int permutation = 0;
     for (; permutation < 10000; ++permutation)
     {
-        for (size_t programIdx = 0; programIdx < m_programSize; ++programIdx)
-        {
-            programMemory[programIdx] = m_initialProgramMemory[programIdx];
-        }
+        program.SetMemory(m_initialMemory, m_memorySize);
+        program.SetMemoryAt(1, permutation / 100);
+        program.SetMemoryAt(2, permutation % 100);
 
-        programMemory[1] = permutation / 100;
-        programMemory[2] = permutation % 100;
-
-        programErrorCode = RunIntcodeProgram(programMemory);
+        programErrorCode = program.Run();
         if (programErrorCode != EErrorCode::Success)
         {
             break;
         }
-        else if (programMemory[0] == 19690720)
+        else if (program.GetMemoryAt(0) == 19690720)
         {
             programErrorCode = EErrorCode::Success;
             break;
+        }
+        else
+        {
+            programErrorCode = EErrorCode::Undefined;
         }
     }
 
@@ -76,20 +80,19 @@ EErrorCode CChallenge_02::Run_SecondPart()
         std::cout << "Permutation = " << permutation << std::endl;
     }
 
-    delete[] programMemory;
     return programErrorCode;
 }
 
 EErrorCode CChallenge_02::CleanUp_SecondPart()
 {
-    delete[] m_initialProgramMemory;
+    delete[] m_initialMemory;
     return EErrorCode::NotImplemented;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-EErrorCode CChallenge_02::LoadIntcodeProgramMemory()
+EErrorCode CChallenge_02::LoadInitialMemory()
 {
     std::string line;
     EErrorCode const readErrorCode = FileHelper::ReadFirstLine(sm_inputFilePath, line);
@@ -102,43 +105,12 @@ EErrorCode CChallenge_02::LoadIntcodeProgramMemory()
     FileHelper::SplitLine(line, ",", items);
 
     size_t const programSize = items.size();
-    m_programSize = programSize;
-    m_initialProgramMemory = new int[programSize];
+    m_memorySize = programSize;
+    m_initialMemory = new int[programSize];
 
-    for (size_t programIdx = 0; programIdx < items.size(); ++programIdx)
+    for (size_t memoryIdx = 0; memoryIdx < items.size(); ++memoryIdx)
     {
-        m_initialProgramMemory[programIdx] = atoi(items[programIdx].c_str());
-    }
-
-    return EErrorCode::Success;
-}
-
-EErrorCode CChallenge_02::RunIntcodeProgram(int* programMemory)
-{
-    size_t programIdx = 0;
-    bool shouldRunProgram = true;
-
-    while (shouldRunProgram)
-    {
-        switch (programMemory[programIdx])
-        {
-        case 1:
-            programMemory[programMemory[programIdx + 3]] = programMemory[programMemory[programIdx + 1]] + programMemory[programMemory[programIdx + 2]];
-            programIdx += 4;
-            break;
-
-        case 2:
-            programMemory[programMemory[programIdx + 3]] = programMemory[programMemory[programIdx + 1]] * programMemory[programMemory[programIdx + 2]];
-            programIdx += 4;
-            break;
-
-        case 99:
-            shouldRunProgram = false;
-            break;
-
-        default:
-            return EErrorCode::Undefined;
-        }
+        m_initialMemory[memoryIdx] = atoi(items[memoryIdx].c_str());
     }
 
     return EErrorCode::Success;

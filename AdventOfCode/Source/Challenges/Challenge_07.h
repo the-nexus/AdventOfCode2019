@@ -2,7 +2,7 @@
 
 #include "Common/Challenge.h"
 
-class CChallenge_02 : public CChallenge
+class CChallenge_07 : public CChallenge
 {
 private:
     virtual EErrorCode SetUp_FirstPart() override;
@@ -13,9 +13,5 @@ private:
     virtual EErrorCode Run_SecondPart() override;
     virtual EErrorCode CleanUp_SecondPart() override;
 
-    EErrorCode LoadInitialMemory();
-
     static std::string const sm_inputFilePath;
-    int* m_initialMemory = nullptr;
-    size_t m_memorySize = 0;
 };
