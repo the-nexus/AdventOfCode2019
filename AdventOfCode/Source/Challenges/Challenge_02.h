@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common/Challenge.h"
+#include "../Utilities/IntcodeProgram.h"
 
 class CChallenge_02 : public CChallenge
 {
@@ -16,6 +17,5 @@ private:
     EErrorCode LoadInitialMemory();
 
     static std::string const sm_inputFilePath;
-    int* m_initialMemory = nullptr;
-    size_t m_memorySize = 0;
+    CIntcodeProgram m_intcodeProgram;
 };

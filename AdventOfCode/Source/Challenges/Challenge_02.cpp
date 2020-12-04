@@ -1,6 +1,5 @@
 #include "Challenge_02.h"
 #include "../Helpers/FileHelpers.h"
-#include "../Utilities/IntcodeProgram.h"
 
 
 
@@ -17,25 +16,25 @@ EErrorCode CChallenge_02::SetUp_FirstPart()
 
 EErrorCode CChallenge_02::Run_FirstPart()
 {
-    CIntcodeProgram program;
-    program.SetMemory(m_initialMemory, m_memorySize);
-    program.SetMemoryAt(1, 12);
-    program.SetMemoryAt(2, 2);
+    m_intcodeProgram.SetMemoryAt(1, 12);
+    m_intcodeProgram.SetMemoryAt(2, 2);
 
-
-    EErrorCode const programErrorCode = program.Run();
-    if (programErrorCode != EErrorCode::Success)
+    EErrorCode programErrorCode = EErrorCode::Success;
+    while (!m_intcodeProgram.HasTerminated() && programErrorCode == EErrorCode::Success)
     {
-        return programErrorCode;
+        programErrorCode = m_intcodeProgram.RunNextOperation();
     }
 
-    std::cout << "First integer = " << program.GetMemoryAt(0) << std::endl;
-    return EErrorCode::Success;
+    if (programErrorCode == EErrorCode::Success)
+    {
+        std::cout << "First integer = " << m_intcodeProgram.GetMemoryAt(0) << std::endl;
+    }
+
+    return programErrorCode;
 }
 
 EErrorCode CChallenge_02::CleanUp_FirstPart()
 {
-    delete[] m_initialMemory;
     return EErrorCode::Success;
 }
 
@@ -49,33 +48,37 @@ EErrorCode CChallenge_02::SetUp_SecondPart()
 
 EErrorCode CChallenge_02::Run_SecondPart()
 {
-    EErrorCode programErrorCode;
-    CIntcodeProgram program;
-
+    EErrorCode programErrorCode = EErrorCode::Success;
+    bool foundPermutation = true;
     int permutation = 0;
+
     for (; permutation < 10000; ++permutation)
     {
-        program.SetMemory(m_initialMemory, m_memorySize);
-        program.SetMemoryAt(1, permutation / 100);
-        program.SetMemoryAt(2, permutation % 100);
+        m_intcodeProgram.ResetProgram();
+        m_intcodeProgram.SetMemoryAt(1, permutation / 100);
+        m_intcodeProgram.SetMemoryAt(2, permutation % 100);
 
-        programErrorCode = program.Run();
-        if (programErrorCode != EErrorCode::Success)
+        while (!m_intcodeProgram.HasTerminated() && programErrorCode == EErrorCode::Success)
         {
-            break;
+            programErrorCode = m_intcodeProgram.RunNextOperation();
         }
-        else if (program.GetMemoryAt(0) == 19690720)
+
+        if (programErrorCode == EErrorCode::Success)
         {
-            programErrorCode = EErrorCode::Success;
-            break;
+            if (m_intcodeProgram.GetMemoryAt(0) == 19690720)
+            {
+                // FOUND!
+                foundPermutation = true;
+                break;
+            }
         }
         else
         {
-            programErrorCode = EErrorCode::Undefined;
+            break;
         }
     }
 
-    if (programErrorCode == EErrorCode::Success)
+    if (foundPermutation)
     {
         std::cout << "Permutation = " << permutation << std::endl;
     }
@@ -85,8 +88,7 @@ EErrorCode CChallenge_02::Run_SecondPart()
 
 EErrorCode CChallenge_02::CleanUp_SecondPart()
 {
-    delete[] m_initialMemory;
-    return EErrorCode::NotImplemented;
+    return EErrorCode::Success;
 }
 
 
@@ -104,14 +106,16 @@ EErrorCode CChallenge_02::LoadInitialMemory()
     std::vector<std::string> items;
     FileHelper::SplitLine(line, ",", items);
 
-    size_t const programSize = items.size();
-    m_memorySize = programSize;
-    m_initialMemory = new int[programSize];
+    size_t const memorySize = items.size();
+    int* initialMemory = new int[memorySize];
 
-    for (size_t memoryIdx = 0; memoryIdx < items.size(); ++memoryIdx)
+    for (size_t memoryIdx = 0; memoryIdx < memorySize; ++memoryIdx)
     {
-        m_initialMemory[memoryIdx] = atoi(items[memoryIdx].c_str());
+        initialMemory[memoryIdx] = atoi(items[memoryIdx].c_str());
     }
 
+    m_intcodeProgram.SetInitialMemory(initialMemory, memorySize);
+
+    delete[] initialMemory;
     return EErrorCode::Success;
 }
